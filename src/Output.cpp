@@ -78,14 +78,14 @@ void OutputFlatDependencies(const Configuration& config, std::unordered_map<std:
     std::ostream& out = outHolder.get();
     out << "digraph dependencies {" << '\n';
     for (const auto &c : components) {
-        if (c.second->root.string().size() > 2 &&
+        if (c.second->root.string().size() > File::FILENAME_SIZE_FOR_ROOT &&
             c.second->files.size()) {
             out << "  " << c.second->QuotedName() << " [shape=" << getShapeForSize(c.second) << "];\n";
         }
 
         std::set<Component *> depcomps;
         for (auto &d : c.second->privDeps) {
-            if (d->root.string().size() > 2 &&
+            if (d->root.string().size() > File::FILENAME_SIZE_FOR_ROOT &&
                 d->files.size()) {
                 if (depcomps.insert(d).second) {
                     out << "  " << c.second->QuotedName() << " -> " << d->QuotedName() << " [color="
@@ -94,7 +94,7 @@ void OutputFlatDependencies(const Configuration& config, std::unordered_map<std:
             }
         }
         for (auto &d : c.second->pubDeps) {
-            if (d->root.string().size() > 2 &&
+            if (d->root.string().size() > File::FILENAME_SIZE_FOR_ROOT &&
                 d->files.size()) {
                 if (depcomps.insert(d).second) {
                     out << "  " << c.second->QuotedName() << " -> " << d->QuotedName() << " [color="
@@ -147,7 +147,7 @@ void PrintGraphOnTarget(const Configuration& config, const filesystem::path &out
 
         std::set<Component *> depcomps;
         for (auto &d : c2->privDeps) {
-            if (d->root.string().size() > 2 &&
+            if (d->root.string().size() > File::FILENAME_SIZE_FOR_ROOT &&
                 d->files.size()) {
                 if (depcomps.insert(d).second) {
                     out << "  " << c2->QuotedName() << " -> " << d->QuotedName() << " [color=" << getLinkColor(config, c2, d)
@@ -159,7 +159,7 @@ void PrintGraphOnTarget(const Configuration& config, const filesystem::path &out
             }
         }
         for (auto &d : c2->pubDeps) {
-            if (d->root.string().size() > 2 &&
+            if (d->root.string().size() > File::FILENAME_SIZE_FOR_ROOT &&
                 d->files.size()) {
                 if (depcomps.insert(d).second) {
                     out << "  " << c2->QuotedName() << " -> " << d->QuotedName() << " [color=" << getLinkColor(config, c2, d)

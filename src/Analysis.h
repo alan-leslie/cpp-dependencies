@@ -21,7 +21,8 @@
 
 void FindCircularDependencies(std::unordered_map<std::string, Component *>& components);
 
-void MapFilesToComponents(std::unordered_map<std::string, Component *> &components, std::unordered_map<std::string, File>& files);
+void MapFilesToComponents(const std::unordered_map<std::string, Component *> &components,
+                          std::unordered_map<std::string, File>& files);
 
 void KillComponent(std::unordered_map<std::string, Component *> &components, const std::string& str);
 

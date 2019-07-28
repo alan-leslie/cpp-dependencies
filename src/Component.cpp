@@ -16,12 +16,33 @@
 
 #include "Component.h"
 
+void RemoveSrcInclude(const boost::filesystem::path &path,
+                      boost::filesystem::path &newPath)
+{
+    std::vector<std::string> elements;
+    for (const auto &p : path) {
+        std::string filename = p.filename().c_str();
+        if(!(filename == "." ||
+             filename == "include" ||
+             filename == "src"))
+        {
+            elements.emplace_back(filename);
+        }
+    }
+
+    for (const auto &p : elements) {
+        newPath.append(p);
+    }
+
+//    newPath = path;
+}
+
 std::string Component::NiceName(char sub) const {
     if (root.string() == ".") {
         return std::string("ROOT");
     }
 
-    std::string nicename = root.generic_string().c_str() + 2;
+    std::string nicename = root.generic_string().c_str() + File::FILENAME_SIZE_FOR_ROOT;
     std::replace(nicename.begin(), nicename.end(), '/', sub);
     return nicename;
 }

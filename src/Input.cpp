@@ -80,7 +80,7 @@ static void ReadCodeFrom(File& f, const char* buffer, size_t buffersize, bool wi
         case None:
         {
             if (nextHash && nextHash < buffer + offset) nextHash = static_cast<const char*>(memchr(buffer+offset, '#', buffersize-offset));
-            if (nextHash == NULL) return;
+            if (nextHash == nullptr) return;
             if (nextSlash && nextSlash < buffer + offset) nextSlash = static_cast<const char*>(memchr(buffer+offset, '/', buffersize-offset));
             if (nextSlash && nextSlash < nextHash) {
                 offset = nextSlash - buffer;
@@ -184,7 +184,7 @@ static void ReadCode(std::unordered_map<std::string, File>& files, const filesys
     File& f = files.insert(std::make_pair(path.generic_string(), File(path))).first->second;
     int fd = open(path.c_str(), O_RDONLY);
     size_t fileSize = filesystem::file_size(path);
-    void* p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
+    void* p = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
     ReadCodeFrom(f, static_cast<const char*>(p), fileSize, withLoc);
     munmap(p, fileSize);
     close(fd);
@@ -319,7 +319,7 @@ void LoadFileList(const Configuration& config,
 
         // skip hidden files and dirs
         const auto& fileName = it->path().filename().generic_string();
-        if ((fileName.size() >= 2 && fileName[0] == '.') ||
+        if ((fileName.size() >= File::FILENAME_SIZE_FOR_ROOT && fileName[0] == '.') ||
             IsItemBlacklisted(config, it->path())) {
 #ifdef WITH_BOOST
             it.no_push();
@@ -329,7 +329,15 @@ void LoadFileList(const Configuration& config,
             continue;
         }       
 
-        if (inferredComponents) AddComponentDefinition(components, parent);
+        if (inferredComponents)
+        {
+            boost::filesystem::path newPath;
+            RemoveSrcInclude(parent, newPath);
+            if(!newPath.empty())
+            {
+                AddComponentDefinition(components, newPath);
+            }
+        }
 
         if (it->path().filename() == "CMakeLists.txt") {
             ReadCmakelist(config, components, it->path());

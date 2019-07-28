@@ -31,15 +31,22 @@ static bool CheckVersionFile(const Configuration& config) {
 }
 
 static std::string targetFrom(const std::string &arg) {
-    if (arg == "ROOT") {
-      return ".";
+    if(File::FILENAME_SIZE_FOR_ROOT > 0)
+    {
+        if (arg == "ROOT") {
+          return ".";
+        }
+        std::string target = arg;
+        if (!target.empty() && target.back() == '/') {
+            target.erase(target.end() - 1);
+        }
+        std::replace(target.begin(), target.end(), '.', '/');
+        return "./" + target;
     }
-    std::string target = arg;
-    if (!target.empty() && target.back() == '/') {
-        target.erase(target.end() - 1);
+    else
+    {
+       return arg;
     }
-    std::replace(target.begin(), target.end(), '.', '/');
-    return "./" + target;
 }
 
 class Operations {
@@ -217,8 +224,8 @@ private:
         LoadProject(true);
         std::size_t totalPublicLinks(0), totalPrivateLinks(0);
         for (const auto &c : components) {
-            totalPublicLinks += c.second->pubDeps.size();
             totalPrivateLinks += c.second->privDeps.size();
+            totalPublicLinks += c.second->pubDeps.size();
         }
         std::cout << components.size() << " components with "
             << totalPublicLinks << " public dependencies, "

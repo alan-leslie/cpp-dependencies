@@ -36,13 +36,15 @@ struct Component;
 struct File {
     File(const filesystem::path& path)
     : path(path)
-    , component(NULL)
+    , component(nullptr)
     , loc(0)
     , includeCount(0)
     , hasExternalInclude(false)
     , hasInclude(false)
     {
     }
+
+    static const int FILENAME_SIZE_FOR_ROOT = 0;
 
     void AddIncludeStmt(bool withPointyBrackets, const std::string& filename) {
         rawIncludes.insert(std::make_pair(filename, withPointyBrackets));
@@ -92,6 +94,9 @@ struct Component {
     bool onStack;
 };
 
+void RemoveSrcInclude(const boost::filesystem::path &path,
+                      boost::filesystem::path &newPath);
+
 std::vector<std::string> SortedNiceNames(const std::unordered_set<Component *> &comps);
 
 Component &AddComponentDefinition(std::unordered_map<std::string, Component *> &components,
@@ -101,7 +106,7 @@ size_t NodesWithCycles(std::unordered_map<std::string, Component *> &components)
 
 void ExtractPublicDependencies(std::unordered_map<std::string, Component *> &components);
 
-void CreateIncludeLookupTable(std::unordered_map<std::string, File>& files,
+void CreateIncludeLookupTable(const std::unordered_map<std::string, File>& files,
                               std::unordered_map<std::string, std::string> &includeLookup,
                               std::map<std::string, std::set<std::string>> &collisions);
 

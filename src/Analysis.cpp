@@ -80,9 +80,14 @@ void KillComponent(std::unordered_map<std::string, Component *> &components, con
   components.erase(str);
 }
 
-void MapFilesToComponents(std::unordered_map<std::string, Component *> &components, std::unordered_map<std::string, File>& files) {
+void MapFilesToComponents(const std::unordered_map<std::string, Component *> &components,
+                          std::unordered_map<std::string, File>& files) {
     for (auto &fp : files) {
         std::string nameCopy = fp.first;
+        boost::filesystem::path path(nameCopy);
+        boost::filesystem::path path2;
+        RemoveSrcInclude(path, path2);
+        nameCopy = path2.generic_string();
         size_t slashPos = nameCopy.find_last_of('/');
         while (slashPos != nameCopy.npos) {
             nameCopy.resize(slashPos);
@@ -105,7 +110,10 @@ void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &inc
         for (auto &p : fp.second.rawIncludes) {
             // If this is a non-pointy bracket include, see if there's a local match first. 
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
-            std::string fullFilePath = (filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            // std::string fullFilePath = (filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            std::string fileName = p.first;
+            std::string fullFilePath = fileName;
+
             if (!p.second && files.count(fullFilePath)) {
                 // This file exists as a local include.
                 File* dep = &files.find(fullFilePath)->second;
@@ -135,11 +143,12 @@ void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &inc
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
                     if (inclpath.size() == dep->component->root.generic_string().size()) {
                         inclpath = ".";
-                    } else if (inclpath.size() > dep->component->root.generic_string().size() + 1) {
-                        inclpath = inclpath.substr(dep->component->root.generic_string().size() + 1);
-                    } else {
-                        inclpath = "";
                     }
+                    //} //else if (inclpath.size() > dep->component->root.generic_string().size() + 1) {
+                    //    inclpath = inclpath.substr(dep->component->root.generic_string().size() + 1);
+//                    } else {
+//                        inclpath = "";
+//                    }
                     if (!inclpath.empty()) {
                         dep->includePaths.insert(inclpath);
                     }
